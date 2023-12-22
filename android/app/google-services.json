@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "903259462804",
+    "project_id": "kidscontrol-763eb",
+    "storage_bucket": "kidscontrol-763eb.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:903259462804:android:ce7f4ca93d824c125f6881",
+        "android_client_info": {
+          "package_name": "com.example.untitled"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCVGNxnuuR0rXMj8z9BLNb3tQEkE56HI3Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
