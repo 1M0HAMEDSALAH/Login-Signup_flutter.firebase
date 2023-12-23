@@ -7,9 +7,9 @@ import 'package:untitled/registerscreen.dart';
 
 
 void main()async {
-  runApp(MyApp());
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  runApp(MyApp());
 }
 
 class MyApp extends StatefulWidget {
@@ -24,7 +24,10 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home:FirebaseAuth.instance.currentUser == null ? loginscreen() : HomePage(),
+      home: (FirebaseAuth.instance.currentUser != null &&
+          FirebaseAuth.instance.currentUser!.emailVerified)
+          ? HomePage()
+          : loginscreen(),
       routes: {
         'RegisterScreen': (context) => const RegisterScreen(),
         'LoginScreen': (context) => const loginscreen(),

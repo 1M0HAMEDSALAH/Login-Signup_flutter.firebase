@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -18,20 +18,18 @@ class _HomePageState extends State<HomePage> {
         actions: [
           IconButton(
               onPressed: ()async {
+                GoogleSignIn googlesignin = GoogleSignIn();
+                googlesignin.disconnect();
                 await FirebaseAuth.instance.signOut();
                 Navigator.of(context).pushReplacementNamed("LoginScreen");
               }, icon: const Icon(Icons.logout))
         ],
       ),
       body:  Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          FirebaseAuth.instance.currentUser!.emailVerified
-              ? Text('Welcome To Our Application')
-              : MaterialButton(onPressed: (){
-                FirebaseAuth.instance.currentUser!.sendEmailVerification();
-                print("aaaaaaaaaaaaaaaaaaaaaaaaaa");
-                },
-            child: Text('press here to verify'),),
+          Text('Welcome To Our Application'),
+          SizedBox(height: 200,),
           FloatingActionButton(
             onPressed: (){},
             child: Icon(Icons.add),
