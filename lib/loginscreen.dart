@@ -16,6 +16,8 @@ class _loginscreenState extends State<loginscreen> {
   var email = TextEditingController();
   var password = TextEditingController();
   GlobalKey<FormState> formkey = GlobalKey<FormState>();
+  String inputText = "example@gmail.com";
+  bool _islaoding = false ;
 
 
   Future signInWithGoogle() async {
@@ -28,12 +30,12 @@ class _loginscreenState extends State<loginscreen> {
     }
 
     // Obtain the auth details from the request
-    final GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
+    final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
 
     // Create a new credential
     final credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth?.accessToken,
-      idToken: googleAuth?.idToken,
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
     );
 
     // Once signed in, return the UserCredential
@@ -42,13 +44,11 @@ class _loginscreenState extends State<loginscreen> {
   }
 
 
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
-      body: Padding(
+      body: _islaoding ? const Center(child: CircularProgressIndicator(),)
+          : Padding(
         padding: const EdgeInsets.all(20),
         child: Center(
           child: SingleChildScrollView(
@@ -56,13 +56,24 @@ class _loginscreenState extends State<loginscreen> {
               key: formkey,
               child: Column(
                 children: [
-                  Container(
-                    child: Image.asset('assets/login.png'),
-                  ),
+                  Image.asset('assets/login.png'),
                   Container(height: 30,),
-                  const Text('Login Now!',style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30),),
-                  SizedBox(height: 10,),
-                  const Text('All Dreams Comes True',style: TextStyle(fontWeight: FontWeight.w200, fontSize: 20,color: Colors.grey),),
+                  const Text(
+                    'Login Now!',
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 30,
+                    ),
+                  ),
+                  const SizedBox(height: 10,),
+                  const Text(
+                    'All Dreams Comes True'
+                    ,style: TextStyle(
+                      fontWeight: FontWeight.w200,
+                      fontSize: 20,
+                      color: Colors.grey,
+                  ),
+                  ),
                   Container(height: 40,),
                   TextFormField(
                     validator: (e){
@@ -98,7 +109,36 @@ class _loginscreenState extends State<loginscreen> {
                   ),
                   Container(
                     alignment: Alignment.topRight,
-                    child: TextButton(onPressed: (){},
+                    child: TextButton(
+                        onPressed: () async {
+                          if (inputText.contains('@gmail')) {
+                            print('Input text contains "@gmail".');
+                            if(email.text == ''){
+                              AwesomeDialog(
+                                context: context,
+                                dialogType: DialogType.error,
+                                animType: AnimType.rightSlide,
+                                desc: 'Please Email Must Not Be Empty..',
+                              ).show();
+                              return;
+                            }
+                            try {
+                              await FirebaseAuth.instance.sendPasswordResetEmail(email: email.text);
+                              AwesomeDialog(
+                                context: context,
+                                dialogType: DialogType.success,
+                                animType: AnimType.rightSlide,
+                                desc: 'Please Check Your Email..',
+                              ).show();
+                            }
+                            catch(e){
+                              print(e);
+                            }
+                          }
+                          else {
+                            print('Input text does not contain "@gmail".');
+                          }
+                        },
                         child: const Text(
                           'Forgot Password ?',
                           style: TextStyle(
@@ -114,10 +154,16 @@ class _loginscreenState extends State<loginscreen> {
                       onPressed: ()async {
                         if(formkey.currentState!.validate()){
                           try {
+                            _islaoding = true;
+                            setState(() {
+                            });
                             final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
                               email: email.text,
                               password: password.text,
                             );
+                            _islaoding = false;
+                            setState(() {
+                            });
                             if(credential.user!.emailVerified){
                               Navigator.of(context).pushReplacementNamed("HomePage");
                             }else{
@@ -126,47 +172,58 @@ class _loginscreenState extends State<loginscreen> {
                                 dialogType: DialogType.warning,
                                 animType: AnimType.rightSlide,
                                 title: 'Verify Required',
-                                desc: 'Please Verify Your Emaill..',
+                                desc: 'Please Verify Your Email..',
                               ).show();
                             }
                           } on FirebaseAuthException catch (e) {
+                            _islaoding = false;
+                            setState(() {
+                            });
                             if (e.code == 'user-not-found') {
                               print('No user found for that email.');
-                              print('mohamed salah .com');
                             } else if (e.code == 'wrong-password') {
                               print('Wrong password provided for that user.');
                             }
                           }
+                        }else{
+                          AwesomeDialog(
+                            context: context,
+                            dialogType: DialogType.error,
+                            animType: AnimType.rightSlide,
+                            title: 'Error',
+                            desc: 'The Email and Password Must not be Empty',
+                          ).show();
                         }
                       },
                       child: const Text('Login',style: TextStyle(color: Colors.white),),
                     ),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 10,
                   ),
-                  Row(
+                  const Text(
+                     "------OR------",
+                     style: TextStyle(fontSize: 20),),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      IconButton(
-                          onPressed: () {},
-                          icon: Icon(
-                            FontAwesomeIcons.facebook,
-                            size: 50,
-                          )),
-                      Container(
-                        width: 32,
-                      ),
-                      IconButton(
-                          onPressed: () {
+                      MaterialButton(
+                          onPressed: (){
                             signInWithGoogle();
                           },
-                          icon: Icon(
-                            FontAwesomeIcons.google,
-                            size: 50,
-                          )),
+                          child: const Row(
+                            children: [
+                              Text("Login With Google"),
+                              SizedBox(width: 5,),
+                              Icon(FontAwesomeIcons.google),
+                            ],
+                          ),
+                      ),
                     ],
-                  ),
+                                     ),
                   Container(height: 15,),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,

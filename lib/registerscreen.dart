@@ -1,3 +1,4 @@
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -17,7 +18,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   var phone = TextEditingController();
   var password = TextEditingController();
   GlobalKey<FormState> formkey = GlobalKey<FormState>();
-
+  String inputText = "example@gmail.com";
 
   Future signInWithGoogle() async {
     // Trigger the authentication flow
@@ -29,19 +30,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
 
     // Obtain the auth details from the request
-    final GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
+    final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
 
     // Create a new credential
     final credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth?.accessToken,
-      idToken: googleAuth?.idToken,
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
     );
 
     // Once signed in, return the UserCredential
     await FirebaseAuth.instance.signInWithCredential(credential);
     Navigator.of(context).pushNamedAndRemoveUntil('HomePage' , (route)=> false );
   }
-
 
 
 
@@ -110,16 +110,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   Container(
                     height: 10,
                   ),
-                  // TextFormField(
-                  //   controller: phone,
-                  //   keyboardType: TextInputType.phone,
-                  //   decoration: const InputDecoration(
-                  //     border: UnderlineInputBorder(),
-                  //     labelText: 'Phone Number',
-                  //     hintText: 'Phone Number',
-                  //     //border: OutlineInputBorder(borderRadius: BorderRadius.circular(24)),
-                  //   ),
-                  // ),
                   Container(
                     height: 10,
                   ),
@@ -142,16 +132,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   Container(
                     height: 10,
                   ),
-                  // TextFormField(
-                  //   obscureText: true,
-                  //   keyboardType: TextInputType.visiblePassword,
-                  //   decoration: const InputDecoration(
-                  //     border: UnderlineInputBorder(),
-                  //     labelText: 'Confirm Password',
-                  //     hintText: 'Type Your password',
-                  //     //border: OutlineInputBorder(borderRadius: BorderRadius.circular(24)),
-                  //   ),
-                  // ),
                   Container(
                     height: 30,
                   ),
@@ -161,22 +141,51 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     color: Colors.black,
                     child: MaterialButton(
                       onPressed: ()async {
-                        if(formkey.currentState!.validate()){
-                          try {
-                            final credential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-                              email: email.text,
-                              password: password.text,
-                            );
-                            FirebaseAuth.instance.currentUser!.sendEmailVerification();
-                            Navigator.of(context).pushReplacementNamed("LoginScreen");
-                          } on FirebaseAuthException catch (e) {
-                            if (e.code == 'weak-password') {
-                              print('The password provided is too weak.');
-                            } else if (e.code == 'email-already-in-use') {
-                              print('The account already exists for that email.');
+                        if(formkey.currentState!.validate()) {
+                          if (inputText.contains('@gmail')) {
+                            print('Input text contains "@gmail".');
+                            try {
+                              await FirebaseAuth.instance
+                                  .createUserWithEmailAndPassword(
+                                email: email.text,
+                                password: password.text,
+                              );
+                              FirebaseAuth.instance.currentUser!
+                                  .sendEmailVerification();
+                              Navigator.of(context).pushReplacementNamed(
+                                  "LoginScreen");
+                            } on FirebaseAuthException catch (e) {
+                              if (e.code == 'weak-password') {
+                                print('The password provided is too weak.');
+                                AwesomeDialog(
+                                  context: context,
+                                  dialogType: DialogType.error,
+                                  animType: AnimType.rightSlide,
+                                  title: 'weak-password',
+                                  desc: 'The password provided is too weak.',
+                                ).show();
+                              } else if (e.code == 'email-already-in-use') {
+                                print(
+                                    'The account already exists for that email.');
+                                AwesomeDialog(
+                                  context: context,
+                                  dialogType: DialogType.info,
+                                  animType: AnimType.rightSlide,
+                                  title: 'Already exists',
+                                  desc: 'Email-already-in-use',
+                                ).show();
+                              }
+                              else {
+                                print('Input text does not contain "@gmail".');
+                                AwesomeDialog(
+                                  context: context,
+                                  dialogType: DialogType.error,
+                                  animType: AnimType.rightSlide,
+                                  title: 'Error',
+                                  desc: 'Input text does not contain "@gmail".',
+                                ).show();
+                              }
                             }
-                          } catch (e) {
-                            print(e);
                           }
                         }
                       },
@@ -186,14 +195,33 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                     ),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 10,
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       IconButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: Text('Simple Dialog'),
+                                  content: Text('This is a simple dialog in Flutter.'),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      onPressed: () {
+                                        // Close the dialog
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: Text('OK'),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          },
                           icon: Icon(
                             FontAwesomeIcons.facebook,
                             size: 50,
@@ -229,3 +257,5 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 }
+
+
